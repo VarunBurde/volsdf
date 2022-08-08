@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
         img_path = os.path.join(img_dir,'{0:08}.jpg'.format(ii))
         cv2.imwrite(img_path, img)
-        print("saving", '{0:07}.jpg'.format(ii))
+        print("saving", '{0:08}.jpg'.format(ii))
 
 
     np.savez(os.path.join( Out_dir, "cameras_before_normalization.npz"), **cameras_npz_format)
