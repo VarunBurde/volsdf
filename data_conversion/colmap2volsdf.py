@@ -3,6 +3,7 @@ import collections
 import numpy as np
 import argparse
 import cv2
+import math
 
 Camera = collections.namedtuple(
     "Camera", ["id", "model", "width", "height", "params"])
@@ -144,6 +145,39 @@ def normalize_cameras(original_cameras_filename,output_cameras_filename,num_of_c
         cameras_new['world_mat_%d' % i] = cameras['world_mat_%d' % i].copy()
     np.savez(output_cameras_filename, **cameras_new)
 
+# ---------------------------------------------------------------------------------------#
+def rotx(theta, unit="rad"):
+    if unit == "deg":
+        theta = theta * math.pi / 180
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    mat = np.matrix([[1, 0, 0], [0, ct, -st], [0, st, ct]])
+    mat = np.asmatrix(mat.round(15))
+    return mat
+
+
+# ---------------------------------------------------------------------------------------#
+def roty(theta, unit="rad"):
+    if unit == "deg":
+        theta = theta * math.pi / 180
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    mat = np.matrix([[ct, 0, st], [0, 1, 0], [-st, 0, ct]])
+    mat = np.asmatrix(mat.round(15))
+    return mat
+
+
+# ---------------------------------------------------------------------------------------#
+def rotz(theta, unit="rad"):
+    if unit == "deg":
+        theta = theta * math.pi / 180
+    ct = math.cos(theta)
+    st = math.sin(theta)
+    mat = np.matrix([[ct, -st, 0], [st, ct, 0], [0, 0, 1]])
+    mat = np.asmatrix(mat.round(15))
+    return mat
+
+
 if __name__ == '__main__':
     args = parse_args()
     Col_dir = args.colmap_data_dir
@@ -175,9 +209,13 @@ if __name__ == '__main__':
         M = np.zeros((3, 4))
         M[:, 3] = cur_image.tvec
         M[:3, :3] = qvec2rotmat(cur_image.qvec)
-
+        rot = rotx(70, unit= 'deg') @ roty(70, unit='deg')
+        M[:3, :3] =  M[:3, :3] @ rot
         P = np.eye(4)
         P[:3, :] = K @ M
+
+
+
         cameras_npz_format['world_mat_%d' % ii] = P
 
         img = cv2.imread(os.path.join(Col_dir, 'images', cur_image.name))
