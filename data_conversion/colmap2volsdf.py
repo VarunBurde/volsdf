@@ -4,7 +4,6 @@ import numpy as np
 import argparse
 import cv2
 import math
-import open3d as o3d
 
 Camera = collections.namedtuple(
     "Camera", ["id", "model", "width", "height", "params"])
@@ -207,12 +206,24 @@ if __name__ == '__main__':
     cameras = read_cameras_text(camera_file)
     images = read_images_text(image_file)
 
-
+    print(cameras[1])
     K = np.eye(3)
-    K[0, 0] = cameras[1].params[0]
-    K[1, 1] = cameras[1].params[1]
-    K[0, 2] = cameras[1].params[2]
-    K[1, 2] = cameras[1].params[3]
+
+    if cameras[1].model == 'SIMPLE_RADIAL':
+        print("radial camera")
+        K[0, 0] = cameras[1].params[0]
+        K[1, 1] = cameras[1].params[0]
+        K[0, 2] = cameras[1].params[1]
+        K[1, 2] = cameras[1].params[2]
+        print(K)
+
+    elif cameras[1].model == 'OPENCV':
+        print("Open cv camera")
+        K[0, 0] = cameras[1].params[0]
+        K[1, 1] = cameras[1].params[1]
+        K[0, 2] = cameras[1].params[2]
+        K[1, 2] = cameras[1].params[3]
+        print(K)
 
     if not os.path.exists(Out_dir):
         os.mkdir(Out_dir)
@@ -221,48 +232,22 @@ if __name__ == '__main__':
         os.mkdir(img_dir)
 
     cameras_npz_format = {}
+
     for ii in range(len(images)):
         cur_image = images[ii +1]
-        up = np.zeros(3)
         M = np.zeros((3, 4))
         M[:, 3] = cur_image.tvec
         M[:3, :3] = qvec2rotmat(cur_image.qvec)
 
-        ####### add extra rotation here
-        rot = rotx(65, unit= 'deg') @ roty(65, unit='deg')
-        M[:3, :3] =  M[:3, :3] @ rot
-
         ########## Projection matrix
         P = np.eye(4)
         P[:3, :] = K @ M
-
-        ###### experiment flippinh
-
-        # P = P[[1, 0, 2, 3], :]  # swap y and z
-        # P[0:3, 0] *= -1
-        # P[0:3, 3] *= -1  # flip the y and z axis
-        # P[0:3, 2] *= -1
-
-
-        # up += P[0:3, 1]
-        #
-        # up = up / np.linalg.norm(up)
-        # print("up vector was", up)
-        # R = rotmat(up, [0, 0, 1])  # rotate up vector to [0,0,1]
-        # R = np.pad(R, [0, 1])
-        # R[-1, -1] = 1
-        #
-        # P = R @ P
-
         cameras_npz_format['world_mat_%d' % ii] = P
 
         img = cv2.imread(os.path.join(Col_dir, 'image', cur_image.name))
-
-
         img_path = os.path.join(img_dir,'{0:08}.jpg'.format(ii))
         cv2.imwrite(img_path, img)
         print("saving", '{0:08}.jpg'.format(ii))
-
 
     np.savez(os.path.join( Out_dir, "cameras_before_normalization.npz"), **cameras_npz_format)
 

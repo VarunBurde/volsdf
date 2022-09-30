@@ -212,9 +212,11 @@ if __name__ == '__main__':
 
     K = np.eye(3)
     K[0, 0] = cameras[1].params[0]
-    K[1, 1] = cameras[1].params[1]
-    K[0, 2] = cameras[1].params[2]
-    K[1, 2] = cameras[1].params[3]
+    K[1, 1] = cameras[1].params[3]
+    K[0, 2] = cameras[1].params[1]
+    K[1, 2] = cameras[1].params[2]
+
+    print(K)
 
     if not os.path.exists(Out_dir):
         os.mkdir(Out_dir)

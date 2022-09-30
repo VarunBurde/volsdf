@@ -163,14 +163,17 @@ def visualize_cameras(colored_camera_dicts, sphere_radius, camera_size=0.1, geom
     o3d.visualization.draw_geometries(things_to_draw)
 
 
-instance_dir1 = 'demo_dir'
-instance_dir2 = 'colamp_dir'
-geometry_file = 'anyfile.ply'
+instance_dir1 = '/home/varun/PycharmProjects/volsdf/data/BlendedMVS/scan1'
+instance_dir2 = '/home/varun/PycharmProjects/volsdf/data/BlendedMVS/scan11'
+instac_1= '/home/varun/PycharmProjects/volsdf/data/Testbed/scan2'
+geometry_file = '/home/varun/PycharmProjects/volsdf/data_conversion/toy_example/surface_100.ply'
 geometry_type = 'mesh'
 
 
 pose_auth, intr_auth, cam_aut = find_poses(instance_dir1)
-pose_col, intr_col, cam_col = find_poses(instance_dir2)
+pose_col, intr_col, cam_col = find_poses(instac_1)
+# print(intr_col[0])
+# print(intr_auth[0])
 
 # for i in range(len(intr_auth)):
 #     print(intr_col[i])
@@ -183,15 +186,15 @@ train_cam_dict = cam_aut
 test_cam_dict = cam_col
 camera_size = 0.15
 colored_camera_dicts = [([0, 1, 0], train_cam_dict),
-                        ([0, 0, 1], test_cam_dict) ]
+                       ([0, 0, 1], test_cam_dict) ]
 
 visualize_cameras(colored_camera_dicts, sphere_radius,
                   camera_size=camera_size, geometry_file=geometry_file, geometry_type=geometry_type)
 
 # trans = icp(points['[0, 1, 0]'], points['[0, 0, 1]'])
 # print(trans)
-print(points['[0, 1, 0]'][2])
-print("  ")
-print(points['[0, 0, 1]'][3])
+# print(points['[0, 1, 0]'][2])
+# print("  ")
+# print(points['[0, 0, 1]'][3])
 # print(points)
 
